@@ -20,12 +20,12 @@ def validate_articles():
     print(f"Found {len(articles)} articles to validate.")
 
     for art in articles:
-        # STEALTH TIMER: Wait a few seconds between searches
-        wait = random.uniform(130, 250)
+        # FASTER STEALTH TIMER: 45-90 seconds per search
+        wait = random.uniform(45, 90)
         print(f"Stealth Mode: Waiting {wait:.2f}s before searching...")
         time.sleep(wait)
         
-        print(f"Investigating: {art['title']}")
+        print(f"Researching: {art['title']}")
         
         # 2. Scour DuckDuckGo (Top 5 Snippets)
         search_snippets = []
@@ -35,26 +35,30 @@ def validate_articles():
                 for r in results:
                     search_snippets.append(f"Source: {r['href']} | Snippet: {r['body']}")
         except Exception as e:
-            print(f"Search failed for this item: {e}")
+            print(f"Search failed: {e}")
             continue
 
-        # 3. Groq (Llama 3.3 70B) Decision Logic
+        # 3. Fragmented Librarian Logic (Groq Llama 3.3 70B)
         prompt = f"""
-        TASK: Validate this news headline.
-        HEADLINE: {art['title']}
-        SEARCH DATA: {search_snippets}
+        ACT AS: A Professional Content Librarian.
+        TITLE: {art['title']}
+        DATA: {search_snippets}
 
-        RULES:
-        1. Is this news real, current, and verified by multiple sources in the snippets?
-        2. If your confidence is 80% or higher, reply with exactly: "VALIDATED"
-        3. If it is fake, old, or unverified, reply with exactly: "FAILED"
+        VALIDATION RULES:
+        1. If it's NEWS: Is it confirmed by multiple sources or a major news outlet?
+        2. If it's a GUIDE/HOW-TO: Is it being discussed by authoritative industry sites?
+        3. If it's a SERIES/NEWSLETTER: Does the search prove this is a legitimate publication series?
+        
+        FINAL DECISION:
+        - If the topic is substantive, real, and has a professional footprint in the search data, reply: "VALIDATED".
+        - If the search results are empty, spammy, or suggest the content is fake, reply: "FAILED".
         """
 
         try:
             completion = groq_client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": prompt}],
-                temperature=0.1 # Keep it strictly factual
+                temperature=0.1 
             )
             decision = completion.choices[0].message.content.strip()
             
@@ -66,7 +70,7 @@ def validate_articles():
                 print(f"Result: FAILED - {art['title']}")
                 
         except Exception as e:
-            print(f"AI Logic Error: {e}")
+            print(f"AI Error: {e}")
 
 if __name__ == "__main__":
     validate_articles()
