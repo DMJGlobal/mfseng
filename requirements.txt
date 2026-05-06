@@ -3,3 +3,4 @@ feedparser
 python-dateutil
 duckduckgo_search
 google-generativeai
+groq
