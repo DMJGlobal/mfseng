@@ -12,7 +12,7 @@ def fetch_and_save():
     feeds = supabase.table("feeds").select("*").execute().data
     
     for feed in feeds:
-        # RANDOMIZED TIMER: Wait 2-5 seconds between every site check
+        # RANDOMIZED TIMER: Wait a few seconds between every site check
         delay = random.uniform(26, 105)
         print(f"Waiting {delay:.2f} seconds before checking {feed['category']}...")
         time.sleep(delay)
