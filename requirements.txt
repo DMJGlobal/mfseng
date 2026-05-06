@@ -1,6 +1,6 @@
 supabase
 feedparser
 python-dateutil
-duckduckgo_search
+ddgs
 google-generativeai
 groq
