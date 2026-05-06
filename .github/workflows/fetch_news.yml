@@ -3,7 +3,7 @@ name: MixFruit Engine Pipeline
 on:
   schedule:
     - cron: '0 * * * *' # Wakes up at the top of every hour
-  workflow_dispatch: # Manual trigger for testing
+  workflow_dispatch: # This creates the "Run workflow" button
 
 jobs:
   run-pipeline:
@@ -25,13 +25,7 @@ jobs:
         run: python engine.py
 
       - name: Stealth Gap: Randomized Wait (25-45 mins)
-        shell: bash
-        run: |
-          MIN_SEC=1500
-          MAX_SEC=2700
-          DELAY_SEC=$(( (RANDOM % (MAX_SEC - MIN_SEC + 1)) + MIN_SEC ))
-          echo "Phase 3 complete. Engine is resting for $((DELAY_SEC / 60)) minutes to remain stealthy..."
-          sleep $DELAY_SEC
+        run: python -c "import random, time; delay = random.randint(1500, 2700); print(f'Engine resting for {delay//60} minutes...'); time.sleep(delay)"
 
       - name: Phase 5: Validate Approved (p2 -> p3)
         env:
