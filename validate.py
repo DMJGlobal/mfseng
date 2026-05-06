@@ -20,14 +20,14 @@ def validate_articles():
     print(f"Found {len(articles)} articles to validate.")
 
     for art in articles:
-        # FASTER STEALTH TIMER: 45-90 seconds per search
+        # UPDATED TIMER: 45-90 seconds (Faster but still stealthy)
         wait = random.uniform(45, 90)
         print(f"Stealth Mode: Waiting {wait:.2f}s before searching...")
         time.sleep(wait)
         
         print(f"Researching: {art['title']}")
         
-        # 2. Scour DuckDuckGo (Top 5 Snippets)
+        # 2. Scour DuckDuckGo
         search_snippets = []
         try:
             with DDGS() as ddgs:
@@ -38,20 +38,20 @@ def validate_articles():
             print(f"Search failed: {e}")
             continue
 
-        # 3. Fragmented Librarian Logic (Groq Llama 3.3 70B)
+        # 3. LIBRARIAN LOGIC (More inclusive than the "Detective")
         prompt = f"""
         ACT AS: A Professional Content Librarian.
         TITLE: {art['title']}
-        DATA: {search_snippets}
+        SEARCH DATA: {search_snippets}
 
         VALIDATION RULES:
-        1. If it's NEWS: Is it confirmed by multiple sources or a major news outlet?
-        2. If it's a GUIDE/HOW-TO: Is it being discussed by authoritative industry sites?
-        3. If it's a SERIES/NEWSLETTER: Does the search prove this is a legitimate publication series?
+        1. If it's NEWS: Is it confirmed by at least one reputable source?
+        2. If it's a GUIDE/HOW-TO: Is the topic being discussed by authoritative industry sites?
+        3. If it's a SERIES/NEWSLETTER: Does the search prove this is a legitimate publication?
         
         FINAL DECISION:
-        - If the topic is substantive, real, and has a professional footprint in the search data, reply: "VALIDATED".
-        - If the search results are empty, spammy, or suggest the content is fake, reply: "FAILED".
+        - If the topic is REAL, SUBSTANTIVE, and has a professional footprint, reply: "VALIDATED".
+        - If the search results are empty, scammy, or suggest the content is fake, reply: "FAILED".
         """
 
         try:
@@ -62,7 +62,6 @@ def validate_articles():
             )
             decision = completion.choices[0].message.content.strip()
             
-            # 4. Update Status in Supabase
             if "VALIDATED" in decision:
                 supabase.table("articles").update({"status": "p3"}).eq("id", art['id']).execute()
                 print(f"Result: SUCCESS (p3) - {art['title']}")
