@@ -35,3 +35,10 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python validate.py
+
+      - name: "Phase 7: Deep Intel Scour (p4 -> p5)"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python scour.py
