@@ -2,7 +2,7 @@ import os
 import time
 import random
 from supabase import create_client
-from duckduckgo_search import DDGS
+from ddgs import DDGS # Updated library name
 from groq import Groq
 
 # 1. Setup Clients
