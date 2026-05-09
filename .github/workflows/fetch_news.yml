@@ -24,6 +24,7 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          RSS_FEEDS_LIST: ${{ secrets.RSS_FEEDS_LIST }}
         run: python engine.py
 
       - name: "Stealth Gap: Randomized Wait (25-45 mins)"
@@ -42,3 +43,13 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python scour.py
+
+      - name: "Phase 8: Write Full Draft (p5 -> p6)"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SME_PERSONAS: ${{ secrets.SME_PERSONAS }}
+          ANTI_AI_SLOP_GUIDELINES: ${{ secrets.ANTI_AI_SLOP_GUIDELINES }}
+          MASTER_CATEGORY_MAP: ${{ secrets.MASTER_CATEGORY_MAP }}
+        run: python draft.py
