@@ -2,5 +2,5 @@ supabase
 feedparser
 python-dateutil
 ddgs
-google-generativeai
+google-genai
 groq
