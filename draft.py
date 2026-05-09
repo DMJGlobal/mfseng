@@ -2,12 +2,11 @@ import os
 import time
 import random
 from supabase import create_client
-import google.generativeai as genai
+from google import genai
 
-# Setup Connections
+# 1. Setup Connections using the new SDK
 supabase = create_client(os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY"))
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-1.5-pro')
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def generate_narratives():
     # Fetch articles ready for drafting (p5)
@@ -27,18 +26,15 @@ def generate_narratives():
     print(f"Drafting Engine: Processing {len(articles)} articles...")
 
     for art in articles:
-        time.sleep(random.uniform(60, 90)) # Pacing for quality and rate limits
+        time.sleep(random.uniform(60, 90)) # Stealth pacing
         
-        # 1. Match Expert Persona
         expert_persona = persona_map.get(art['category'], "Senior Marketing Director with 15+ years experience")
-        
-        # 2. Filter relevant subcategories from the master map for the AI to choose from
         available_subs = [line.split("|")[1] for line in category_map if line.split("|")[0] == art['category']]
         subcategory_list = ", ".join(available_subs)
 
         print(f"Writing Narrative ({art['category']}): {art['title']}")
 
-        # 3. The Comprehensive "Director" Prompt
+        # 3. The Comprehensive "Director" Prompt (Preserving your manual changes)
         prompt = f"""
         {slop_rules}
 
@@ -72,7 +68,11 @@ def generate_narratives():
         """
 
         try:
-            response = model.generate_content(prompt)
+            # Using the new SDK generate_content method
+            response = client.models.generate_content(
+                model='gemini-1.5-pro',
+                contents=prompt,
+            )
             full_draft = response.text
             
             # Save draft and promote to p6 (Executive Review)
