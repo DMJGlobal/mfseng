@@ -4,9 +4,11 @@ import random
 from supabase import create_client
 from google import genai
 
-# 1. Setup Connections
+# 1. Setup Connections - Explicitly targeting the v1 Stable API
 supabase = create_client(os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY"))
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+client = genai.Client(
+    api_key=os.environ.get("GEMINI_API_KEY"),
+    http_options={'api_version': 'v1'} # FORCES STABLE ENDPOINT
 
 def generate_narratives():
     # Only target articles that have finished research (p5)
@@ -67,9 +69,9 @@ print(AUDIT: Phase 8 Writer (Modern SDK) is active.")
         """
 
         try:
-            # Modern SDK syntax
+            # SWITCHED TO MODERN gemini-2.5-pro MODEL
             response = client.models.generate_content(
-                model='gemini-1.5-pro',
+                model='gemini-2.5-pro',
                 contents=prompt
             )
             full_draft = response.text
