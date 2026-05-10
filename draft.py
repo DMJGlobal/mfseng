@@ -27,7 +27,7 @@ def generate_narratives():
     
     category_map = os.environ.get("MASTER_CATEGORY_MAP", "").strip().split("\n")
     slop_rules = os.environ.get("ANTI_AI_SLOP_GUIDELINES", "")
-title_rules = os.environ.get("TITLE_DIRECTIVES", "")
+    title_rules = os.environ.get("TITLE_DIRECTIVES", "")
     print(f"Drafting Engine: Processing {len(articles)} articles...")
 
     for art in articles:
