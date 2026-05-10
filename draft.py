@@ -31,7 +31,7 @@ def generate_narratives():
     print(f"Drafting Engine: Processing {len(articles)} articles...")
 
     for art in articles:
-        time.sleep(random.uniform(60, 90)) # Stealth delay
+        time.sleep(random.uniform(30, 60))
         
         # Match Expert Persona and Filter Subcategories
         expert_persona = persona_map.get(art['category'], "Senior Marketing Director with 15+ years experience")
@@ -72,7 +72,7 @@ def generate_narratives():
         try:
             # Modern gemini-2.5-pro MODEL
             response = client.models.generate_content(
-                model='gemini-2.5-pro',
+                model='gemini-3-flash',
                 contents=prompt
             )
             full_draft = response.text
