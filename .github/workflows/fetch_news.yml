@@ -50,7 +50,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: python scour.py
 
-      - name: "Phase 8: Write Full Draft (p5 -> p6)"
+    - name: "Phase 8: Write Full Draft (p5 -> p6)"
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -58,4 +58,5 @@ jobs:
           SME_PERSONAS: ${{ secrets.SME_PERSONAS }}
           ANTI_AI_SLOP_GUIDELINES: ${{ secrets.ANTI_AI_SLOP_GUIDELINES }}
           MASTER_CATEGORY_MAP: ${{ secrets.MASTER_CATEGORY_MAP }}
+          TITLE_DIRECTIVES: ${{ secrets.TITLE_DIRECTIVES }} # <-- ADD THIS LINE
         run: python draft.py
