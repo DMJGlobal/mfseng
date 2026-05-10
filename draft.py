@@ -10,6 +10,8 @@ client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def generate_narratives():
     # Only target articles that have finished research (p5)
+print(AUDIT: Phase 8 Writer (Modern SDK) is active.")
+    
     articles = supabase.table("articles").select("*").eq("status", "p5").execute().data
     
     if not articles:
