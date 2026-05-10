@@ -99,3 +99,4 @@ title_rules = os.environ.get("TITLE_DIRECTIVES", "")
 
 if __name__ == "__main__":
     generate_narratives()
+
