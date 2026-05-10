@@ -8,12 +8,13 @@ from google import genai
 supabase = create_client(os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY"))
 client = genai.Client(
     api_key=os.environ.get("GEMINI_API_KEY"),
-    http_options={'api_version': 'v1'} # FORCES STABLE ENDPOINT
+    http_options={'api_version': 'v1'}
+) # FIXED: Added missing closing bracket
 
 def generate_narratives():
+    # FIXED: Added missing quote and proper indentation
+    print("AUDIT: Phase 8 Writer (Modern SDK) is active.")
     # Only target articles that have finished research (p5)
-print(AUDIT: Phase 8 Writer (Modern SDK) is active.")
-    
     articles = supabase.table("articles").select("*").eq("status", "p5").execute().data
     
     if not articles:
@@ -69,7 +70,7 @@ print(AUDIT: Phase 8 Writer (Modern SDK) is active.")
         """
 
         try:
-            # SWITCHED TO MODERN gemini-2.5-pro MODEL
+            # Modern gemini-2.5-pro MODEL
             response = client.models.generate_content(
                 model='gemini-2.5-pro',
                 contents=prompt
