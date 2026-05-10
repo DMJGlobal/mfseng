@@ -13,7 +13,7 @@ client = genai.Client(
 
 def generate_narratives():
     # FIXED: Added missing quote and proper indentation
-    print("AUDIT: Phase 8 Writer (Modern SDK) is active.")
+    print("AUDIT: Phase 8 Writer (model gemini-3-flash) is active.")
     # Only target articles that have finished research (p5)
     articles = supabase.table("articles").select("*").eq("status", "p5").execute().data
     
