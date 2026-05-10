@@ -4,12 +4,12 @@ import random
 from supabase import create_client
 from google import genai
 
-# 1. Setup Connections using the new SDK
+# 1. Setup Connections
 supabase = create_client(os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY"))
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def generate_narratives():
-    # Fetch articles ready for drafting (p5)
+    # Only target articles that have finished research (p5)
     articles = supabase.table("articles").select("*").eq("status", "p5").execute().data
     
     if not articles:
@@ -26,15 +26,15 @@ def generate_narratives():
     print(f"Drafting Engine: Processing {len(articles)} articles...")
 
     for art in articles:
-        time.sleep(random.uniform(60, 90)) # Stealth pacing
+        time.sleep(random.uniform(60, 90)) # Stealth delay
         
+        # Match Expert Persona and Filter Subcategories
         expert_persona = persona_map.get(art['category'], "Senior Marketing Director with 15+ years experience")
         available_subs = [line.split("|")[1] for line in category_map if line.split("|")[0] == art['category']]
         subcategory_list = ", ".join(available_subs)
 
         print(f"Writing Narrative ({art['category']}): {art['title']}")
 
-        # 3. The Comprehensive "Director" Prompt (Preserving your manual changes)
         prompt = f"""
         {slop_rules}
 
@@ -47,35 +47,32 @@ def generate_narratives():
 
         <structural_parameters>
         - Format: 800+ word deep-dive feature article.
-        - Architecture: Follow the 'Five-Boxes' journalistic structure (Hook, Nut Graph, Secondary Lead/Context, Midpoint Pivot, Forward-Looking Resolution).
-        - No 'summary' conclusions. End with a 'Kicker'—actionable momentum or industry projection.
+        - Architecture: Follow the 'Five-Boxes' journalistic structure (Hook, Nut Graph, Secondary Lead, Midpoint Pivot, Forward-Looking Resolution).
+        - No 'summary' conclusions. End with a 'Kicker'.
         </structural_parameters>
 
         <metadata_and_taxonomy>
-        1. SUBCATEGORY SELECTION: From the list [{subcategory_list}], select the most relevant one. Output as: 'Subcategory: [Choice]'
-        2. META DESCRIPTION: Write a 100-120 character hook for search engines.
-        3. TAGS: Provide 4 or 5 relevant tags (max 4 words per tag, minimum 2 words per tag).
-        4. IMAGE PLANNING:
-           - FEATURED_IMAGE: Provide a specific image search term for Pexels/Pixabay.
-           - INLINE_IMAGE_1: Provide a search term and indicate placement after a specific and relevant paragraph.
-           - INLINE_IMAGE_2: Provide a search term and indicate placement after a specific and relevant paragraph.
+        1. SUBCATEGORY SELECTION: From [{subcategory_list}], select the most relevant one. Output as: 'Subcategory: [Choice]'
+        2. META DESCRIPTION: Write a 100-120 character hook.
+        3. TAGS: Provide 4-5 relevant tags (max 4 words per tag, minimum 2 words per tag).
+        4. IMAGE PLANNING: Provide search terms for FEATURED_IMAGE and 2 INLINE_IMAGES with specific placements.
         </metadata_and_taxonomy>
 
         <editorial_directive>
-        Ensure every sentence is inextricably linked to the provided facts. Delete all probabilistic smoothing or generic transitions. 
-        Use active verbs. Avoid nominalizations. Demonstrate profound understanding of the audience's pain points.
+        Ensure every sentence is inextricably linked to the provided facts. Delete all generic transitions. 
+        Use active verbs. Avoid nominalizations.
         </editorial_directive>
         """
 
         try:
-            # Using the new SDK generate_content method
+            # Modern SDK syntax
             response = client.models.generate_content(
                 model='gemini-1.5-pro',
-                contents=prompt,
+                contents=prompt
             )
             full_draft = response.text
             
-            # Save draft and promote to p6 (Executive Review)
+            # Save the draft and promote to p6
             supabase.table("articles").update({
                 "content_p5": full_draft,
                 "status": "p6"
