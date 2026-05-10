@@ -13,7 +13,7 @@ client = genai.Client(
 
 def generate_narratives():
     # FIXED: Added missing quote and proper indentation
-    print("AUDIT: Phase 8 Writer (model gemini-3-flash) is active.")
+    print("AUDIT: Phase 8 Writer (Flash SDK + Secret Titles) is active.")
     # Only target articles that have finished research (p5)
     articles = supabase.table("articles").select("*").eq("status", "p5").execute().data
     
@@ -27,7 +27,7 @@ def generate_narratives():
     
     category_map = os.environ.get("MASTER_CATEGORY_MAP", "").strip().split("\n")
     slop_rules = os.environ.get("ANTI_AI_SLOP_GUIDELINES", "")
-
+title_rules = os.environ.get("TITLE_DIRECTIVES", "")
     print(f"Drafting Engine: Processing {len(articles)} articles...")
 
     for art in articles:
@@ -45,7 +45,7 @@ def generate_narratives():
 
         <context_layering>
         ACT AS: {expert_persona}
-        TOPIC: {art['title']}
+        ORIGINAL_TOPIC: {art['title']}
         FACTUAL_BACKBONE: 
         {art['content_p5']}
         </context_layering>
@@ -61,6 +61,7 @@ def generate_narratives():
         2. META DESCRIPTION: Write a 100-120 character hook.
         3. TAGS: Provide 4-5 relevant tags (max 4 words per tag, minimum 2 words per tag).
         4. IMAGE PLANNING: Provide search terms for FEATURED_IMAGE and 2 INLINE_IMAGES with specific placements.
+        5. POST TITLE: Generate a completely original title based on these strict rules: {title_rules}. Output exactly as: 'POST TITLE: [Your Title]'
         </metadata_and_taxonomy>
 
         <editorial_directive>
@@ -77,12 +78,21 @@ def generate_narratives():
             )
             full_draft = response.text
             
-            # Save the draft and promote to p6
+           # --- TITLE EXTRACTION LOGIC ---
+            # Finds the AI-generated title and extracts it to update the database
+            new_title = art['title'] 
+            for line in full_draft.split("\n"):
+                if line.startswith("POST TITLE:"):
+                    new_title = line.replace("POST TITLE:", "").strip()
+                    break
+            
+            # Save the draft, update the title, and promote to p6
             supabase.table("articles").update({
+                "title": new_title, 
                 "content_p5": full_draft,
                 "status": "p6"
             }).eq("url", art['url']).execute()
-            print(f"Result: SUCCESS (p6) - Narrative complete for {art['title']}")
+            print(f"Result: SUCCESS (p6) - New Title: {new_title}")
                 
         except Exception as e:
             print(f"Drafting Error for {art['title']}: {e}")
