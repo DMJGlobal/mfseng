@@ -71,9 +71,9 @@ def generate_narratives():
         """
 
         try:
-            # Modern gemini-2.5-pro MODEL
+            # gemini-2.5-flash MODEL
             response = client.models.generate_content(
-                model='gemini-3-flash',
+                model='gemini-2.5-flash',
                 contents=prompt
             )
             full_draft = response.text
