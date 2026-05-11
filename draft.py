@@ -4,17 +4,13 @@ import random
 from supabase import create_client
 from google import genai
 
-# 1. Setup Connections - Explicitly targeting the v1 Stable API
+# 1. Setup Connections
 supabase = create_client(os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY"))
-client = genai.Client(
-    api_key=os.environ.get("GEMINI_API_KEY"),
-    http_options={'api_version': 'v1'}
-) # FIXED: Added missing closing bracket
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
 def generate_narratives():
-    # FIXED: Added missing quote and proper indentation
-    print("AUDIT: Phase 8 Writer (Flash SDK + Secret Titles) is active.")
-    # Only target articles that have finished research (p5)
+    print("AUDIT: Phase 8 Writer (Flash SDK + Prompt Architecture Fixed) is active.")
+    
     articles = supabase.table("articles").select("*").eq("status", "p5").execute().data
     
     if not articles:
@@ -28,10 +24,11 @@ def generate_narratives():
     category_map = os.environ.get("MASTER_CATEGORY_MAP", "").strip().split("\n")
     slop_rules = os.environ.get("ANTI_AI_SLOP_GUIDELINES", "")
     title_rules = os.environ.get("TITLE_DIRECTIVES", "")
+
     print(f"Drafting Engine: Processing {len(articles)} articles...")
 
     for art in articles:
-        time.sleep(random.uniform(30, 60))
+        time.sleep(random.uniform(30, 60)) 
         
         # Match Expert Persona and Filter Subcategories
         expert_persona = persona_map.get(art['category'], "Senior Marketing Director with 15+ years experience")
@@ -41,7 +38,11 @@ def generate_narratives():
         print(f"Writing Narrative ({art['category']}): {art['title']}")
 
         prompt = f"""
+        YOUR TASK: You are an elite, director-level writer and subject matter expert. You must write a high-end, 800+ word feature article based EXCLUSIVELY on the provided 'FACTUAL_BACKBONE'. 
+
+        <anti_slop_guidelines>
         {slop_rules}
+        </anti_slop_guidelines>
 
         <context_layering>
         ACT AS: {expert_persona}
@@ -57,28 +58,31 @@ def generate_narratives():
         </structural_parameters>
 
         <metadata_and_taxonomy>
-        1. SUBCATEGORY SELECTION: From [{subcategory_list}], select the most relevant one. Output as: 'Subcategory: [Choice]'
-        2. META DESCRIPTION: Write a 100-120 character hook.
-        3. TAGS: Provide 4-5 relevant tags (max 4 words per tag, minimum 2 words per tag).
-        4. IMAGE PLANNING: Provide search terms for FEATURED_IMAGE and 2 INLINE_IMAGES with specific placements.
-        5. POST TITLE: Generate a completely original title based on these strict rules: {title_rules}. Output exactly as: 'POST TITLE: [Your Title]'
+        You MUST output the following metadata at the very beginning of your response:
+        1. POST TITLE: Generate a completely original title based on these strict rules: {title_rules}. Output exactly as: 'POST TITLE: [Your Title]'
+        2. SUBCATEGORY SELECTION: From [{subcategory_list}], select the most relevant one. Output as: 'Subcategory: [Choice]'
+        3. META DESCRIPTION: Write a 100-120 character hook.
+        4. TAGS: Provide 4-5 relevant tags (max 4 words per tag, minimum 2 words per tag).
+        5. IMAGE PLANNING: Provide search terms for FEATURED_IMAGE and 2 INLINE_IMAGES with specific placements.
         </metadata_and_taxonomy>
 
         <editorial_directive>
         Ensure every sentence is inextricably linked to the provided facts. Delete all generic transitions. 
         Use active verbs. Avoid nominalizations.
         </editorial_directive>
+
+        NOW, EXECUTE YOUR TASK. Output the Metadata first, followed immediately by the Article.
         """
 
         try:
-            # gemini-2.5-flash MODEL
+            # Modern SDK syntax targeting Flash
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=prompt
             )
             full_draft = response.text
             
-           # --- TITLE EXTRACTION LOGIC ---
+            # --- TITLE EXTRACTION LOGIC ---
             # Finds the AI-generated title and extracts it to update the database
             new_title = art['title'] 
             for line in full_draft.split("\n"):
@@ -99,4 +103,3 @@ def generate_narratives():
 
 if __name__ == "__main__":
     generate_narratives()
-
